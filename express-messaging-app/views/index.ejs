@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Mom</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Basic styles for context menu */
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        .context-menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .context-menu-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body class="bg-base-300 h-full">
+    <%- include('./navbar.ejs') %>
+    <div class="max-w-2xl mx-auto py-10">
+        <% if (isLoggedIn) { %>
+            <!-- Form for sending messages -->
+            <form action="/send-message" method="POST" class="mb-6">
+                <div class="form-control">
+                    <textarea name="message" rows="4" class="textarea textarea-bordered w-full" placeholder="Write a message..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary mt-4">Send</button>
+            </form>
+        <% } %>
+
+        <h2 class="text-xl font-semibold mb-4">Messages</h2>
+
+        <!-- Display messages -->
+        <div id="messages" class="space-y-4 bg-base-200 p-4 rounded-lg shadow">
+            <% messages.forEach(function(message) { %>
+                <div class="chat <%= message.from === 'Mom' ? 'chat-start' : 'chat-end' %>"
+                     data-id="<%= message._id %>"
+                     data-from="<%= message.from %>">
+                    <div class="chat-header">
+                        <%= message.from %>
+                        <time class="text-xs opacity-50"><%= new Date(message.createdAt).toLocaleTimeString() %></time>
+                    </div>
+                    <div class="chat-bubble <%= message.from === 'Mom' ? 'bg-secondary text-white' : 'bg-primary text-white' %>">
+                        <%= message.text %>
+                    </div>
+                    <div class="chat-footer opacity-50">Delivered</div>
+                </div>
+            <% }); %>
+        </div>
+
+        <div class="text-right mb-4">
+            <a href="/logout" class="btn btn-outline mt-4">Logout</a>
+        </div>
+    </div>
+
+    <!-- Custom Context Menu -->
+    <div id="context-menu" class="context-menu">
+        <div class="context-menu-item" id="delete-message">Delete Message</div>
+    </div>
+
+    <!-- Socket.IO and notification handling -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Function to show the notification
+        function showNotification(message) {
+            if (Notification.permission === 'granted') {
+                new Notification(`New message from ${message.from}`, {
+                    body: message.text,
+                });
+            }
+        }
+
+        // Request permission to send notifications
+        function requestNotificationPermission() {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        console.log('Notification permission granted.');
+                    } else {
+                        console.log('Notification permission denied.');
+                    }
+                });
+            }
+        }
+
+        // Call the permission request on page load
+        requestNotificationPermission();
+
+        // Append new messages to the message list and show notification
+        socket.on('newMessage', function(message) {
+            const messagesDiv = document.getElementById('messages');
+            const newMessage = document.createElement('div');
+            newMessage.className = `chat ${message.from === 'Mom' ? 'chat-start' : 'chat-end'}`;
+            newMessage.setAttribute('data-id', message._id);
+            newMessage.setAttribute('data-from', message.from);
+            newMessage.innerHTML = `
+                <div class="chat-header">
+                    ${message.from}
+                    <time class="text-xs opacity-50">${new Date(message.createdAt).toLocaleTimeString()}</time>
+                </div>
+                <div class="chat-bubble ${message.from === 'Mom' ? 'bg-secondary text-white' : 'bg-primary text-white'}">
+                    ${message.text}
+                </div>
+                <div class="chat-footer opacity-50">Delivered</div>`;
+            messagesDiv.appendChild(newMessage);
+
+            // Show a notification for the new message
+            showNotification(message);
+        });
+
+        // Handle right-click on messages
+        document.getElementById('messages').addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+            const messageElement = event.target.closest('.chat');
+            if (messageElement && messageElement.getAttribute('data-from') === 'Aadi') {
+                const contextMenu = document.getElementById('context-menu');
+                const { clientX: x, clientY: y } = event;
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = `${x}px`;
+                contextMenu.style.top = `${y}px`;
+                contextMenu.dataset.messageId = messageElement.getAttribute('data-id');
+            }
+        });
+
+        // Handle click outside the context menu
+        document.addEventListener('click', function(event) {
+            const contextMenu = document.getElementById('context-menu');
+            if (!contextMenu.contains(event.target)) {
+                contextMenu.style.display = 'none';
+            }
+        });
+
+        // Handle delete message
+        document.getElementById('delete-message').addEventListener('click', function() {
+            const messageId = document.getElementById('context-menu').dataset.messageId;
+            if (messageId) {
+                fetch(`/delete-message/${messageId}`, {
+                    method: 'DELETE'
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector(`.chat[data-id="${messageId}"]`).remove();
+                    } else {
+                        alert('Failed to delete message');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+                document.getElementById('context-menu').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

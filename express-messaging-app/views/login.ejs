@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+<body class="bg-base-300 h-full">
+    <%- include('./navbar.ejs') %>
+    <div class="max-w-md mx-auto py-10">
+        <h1 class="text-3xl font-bold text-center text-green-600 mb-6">Login</h1>
+        <form action="/login" method="POST" class="space-y-4">
+            <div class="form-control">
+                <input type="text" name="username" class="input input-bordered w-full" placeholder="Username" required>
+            </div>
+            <div class="form-control">
+                <input type="password" name="password" class="input input-bordered w-full" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-full">Login</button>
+        </form>
+    </div>
+</body>
+</html>

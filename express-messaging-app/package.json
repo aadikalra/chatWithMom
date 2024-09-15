@@ -1,0 +1,31 @@
+{
+  "name": "express-messaging-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "npx tailwindcss -i ./public/tailwind.css -o ./public/style.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "connect-mongo": "^5.1.0",
+    "daisyui": "^4.12.10",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.0",
+    "mongoose": "^8.6.2",
+    "node-notifier": "^10.0.1",
+    "socket.io": "^4.7.5",
+    "tailwindcss": "^3.4.11"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/express-ejs-layouts": "^2.5.4",
+    "@types/express-session": "^1.18.0",
+    "@types/node-notifier": "^8.0.5"
+  }
+}

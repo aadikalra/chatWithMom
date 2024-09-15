@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error <%= code %></title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="h-full bg-gray-100">
+    <%- include('./navbar.ejs') %>
+    <main class="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
+        <div class="text-center">
+            <p class="text-base font-semibold text-indigo-600">
+                Error <%= code %>
+            </p>
+            <h1 class="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+                <%= message %>
+            </h1>
+            <p class="mt-6 text-base leading-7 text-gray-600">
+                <% if (code === 401) { %>
+                    Sorry, those are invalid credentials. Please try again.
+                <% } else if (code === 404) { %>
+                    The page you are looking for does not exist.
+                <% } else if (code === 500) { %>
+                    An internal server error occurred. Please try again later.
+                <% } %>
+            </p>
+            <div class="mt-10 flex items-center justify-center gap-x-6">
+                <a href="/login"
+                    class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Back
+                    to Login</a>
+                <a href="/"
+                    class="rounded-md bg-gray-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">Go
+                    back home</a>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
